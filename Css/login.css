@@ -1,0 +1,275 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f3f5fa;
+    min-height: 100vh;
+}
+
+
+/* CONTENEDOR PRINCIPAL */
+
+.login-container {
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 30px;
+}
+
+
+/* TARJETA */
+
+.login-card {
+    width: 100%;
+    max-width: 675px;
+
+    background: white;
+
+    padding: 70px 54px;
+
+    border-radius: 16px;
+
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+
+/* LOGO */
+
+.logo {
+    width: 100px;
+    height: 100px;
+
+    margin: 0 auto 20px;
+
+    border-radius: 50%;
+
+    background: #eef2ff;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 45px;
+}
+
+
+/* TITULO */
+
+.login-card h1 {
+    text-align: center;
+
+    font-size: 40px;
+    font-weight: 700;
+
+    color: #080808;
+
+    margin-bottom: 10px;
+}
+
+
+/* SUBTITULO */
+
+.subtitle {
+    text-align: center;
+
+    color: #6b7280;
+
+    font-size: 20px;
+
+    margin-bottom: 55px;
+}
+
+
+/* INPUT GROUP */
+
+.input-group {
+    margin-bottom: 28px;
+}
+
+.input-group label {
+    display: block;
+
+    font-size: 17px;
+    font-weight: 500;
+
+    color: #111827;
+
+    margin-bottom: 10px;
+}
+
+
+/* CONTENEDOR DEL INPUT */
+
+.input-container {
+    height: 62px;
+
+    border: 1px solid #d9dce2;
+
+    border-radius: 10px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 16px;
+
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input-container:focus-within {
+    border-color: #2f6df6;
+
+    box-shadow: 0 0 0 3px rgba(47, 109, 246, 0.12);
+}
+
+
+/* ICONO */
+
+.input-icon {
+    width: 30px;
+
+    font-size: 21px;
+
+    color: #8b929d;
+
+    display: flex;
+    justify-content: center;
+
+    margin-right: 10px;
+}
+
+
+/* INPUT */
+
+.input-container input {
+    width: 100%;
+    height: 100%;
+
+    border: none;
+    outline: none;
+
+    font-size: 17px;
+
+    color: #111827;
+
+    background: transparent;
+}
+
+.input-container input::placeholder {
+    color: #9ca3af;
+}
+
+
+/* MOSTRAR CONTRASEÑA */
+
+.show-password {
+    border: none;
+    background: transparent;
+
+    cursor: pointer;
+
+    font-size: 20px;
+
+    color: #8b929d;
+
+    padding: 5px;
+}
+
+
+/* RECORDARME */
+
+.remember-container {
+    display: flex;
+
+    align-items: center;
+
+    margin-top: 5px;
+    margin-bottom: 30px;
+}
+
+.remember {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    color: #6b7280;
+
+    font-size: 17px;
+
+    cursor: pointer;
+}
+
+.remember input {
+    width: 20px;
+    height: 20px;
+
+    cursor: pointer;
+}
+
+
+/* BOTON LOGIN */
+
+.login-button {
+    width: 100%;
+    height: 60px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background: #2f6df6;
+
+    color: white;
+
+    font-size: 18px;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 10px;
+
+    transition: background 0.2s, transform 0.1s;
+}
+
+.login-button:hover {
+    background: #2563eb;
+}
+
+.login-button:active {
+    transform: scale(0.99);
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 600px) {
+
+    .login-container {
+        padding: 20px;
+    }
+
+    .login-card {
+        padding: 45px 25px;
+    }
+
+    .login-card h1 {
+        font-size: 32px;
+    }
+
+    .subtitle {
+        font-size: 17px;
+        margin-bottom: 40px;
+    }
+
+}

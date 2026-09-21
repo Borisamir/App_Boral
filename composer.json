@@ -1,0 +1,28 @@
+{
+    "name": "asus/app_boral",
+    "require": {
+        "pecee/simple-router": "^5.4",
+        "vlucas/phpdotenv": "^5.6",
+        "firebase/php-jwt": "^7.1"
+    },
+    "require-dev": {
+        "pecee/simple-router": "^5.4",
+        "vlucas/phpdotenv": "^5.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Helpers\\": "Helpers/",
+            "App\\": "App/"
+        },
+        "files": [
+            "Helpers/functions.php"
+
+        ]
+    },
+    "authors": [
+        {
+            "name": "Borisamir",
+            "email": "echevarriaboris@gmail.com"
+        }
+    ]
+}
