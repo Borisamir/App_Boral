@@ -59,7 +59,7 @@ La autenticación la realiza `Middleware::verify_jwt()`, que valida con HS256 el
 
 ### Endpoints de la API_BORAL consumidos desde el frontend
 
-Las peticiones se hacen con `fetch` desde los archivos de `Js/` (`http://localhost:8000`).
+Las peticiones se hacen con `fetch` desde los archivos de `Js/` (`ruta`).
 
 | Método | Endpoint            | Usado en                | Descripción                    |
 |--------|---------------------|-------------------------|--------------------------------|
