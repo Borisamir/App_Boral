@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar sesión - BoralPanel</title>
     <link rel="stylesheet" href="../../Css/global.css">
+    <script>
+        window.APP_CONFIG ={ API_URL : <?= json_encode($_ENV['API_URL']) ?>};
+    </script>
+    <script type ="module" src="../../Js/util.js" defer></script>
     <script type="module" src="../../Js/login.js" defer></script>
 </head>
 
