@@ -2,9 +2,9 @@
 
 import { mostrarNotificacion , mostrarError } from "./notificacion.js"
 import { ventas_totales_cache, ingresos_totales_diarios_cache} from "./sells.js"
-import { getUser , getCookie } from "./util.js"
+import { getUser , getCookie , apiFetch , verify_fields, verify_answer_fetch  , API_URL} from "./util.js"
 
-const API_URL = window.APP_CONFIG.API_URL;
+
 
 let eventos_actuales=[]
 
@@ -58,7 +58,7 @@ export async function initProducts(){
 
         const btn_guardar = document.getElementById("btn-guardar")
 
-        registrarEvento(btn_guardar , "click" , addProduct)
+        registrarEvento(btn_guardar , "click" , agregarProducto)
     
         modalProducto.classList.add("active");
 
@@ -71,33 +71,45 @@ export async function initProducts(){
 
    
 
-   function addProduct(event){
-    event.preventDefault()
-    agregarProducto().then(id => {
+    async function agregarProducto(event){
+        event.preventDefault()
+
+        const id= await agregarProducto_fetch()
+
+        if(!id){
+            return
+        }
+
         agregarProductoHTML(id)
-        sumar_total_productos()
 
-    })
+    }
 
-    function agregarProducto(){
+   async function agregarProducto_fetch(){
 
-    const nombre = document.getElementById("nombre_producto").value
-    const precio = document.getElementById("precio").value
-    const precio_venta = document.getElementById("precio_venta").value
-    const marca = document.getElementById("marca").value
-    const stock = document.getElementById("stock").value
-    const categoria = document.getElementById("categoria").value
-    const estado = document.getElementById("estado").value
+         const nombre = document.getElementById("nombre_producto").value
+         const precio = document.getElementById("precio").value
+         const precio_venta = document.getElementById("precio_venta").value
+         const marca = document.getElementById("marca").value
+         const stock = document.getElementById("stock").value
+         const categoria = document.getElementById("categoria").value
+         const estado = document.getElementById("estado").value
+
+         if(!verify_fields({
+            Nombre : nombre,
+            Precio : precio,
+            Precio_Venta : precio_venta,
+            Marca : marca,
+            Stock : stock,
+            Categoria : categoria,
+            Estado : estado,
+         })){
+            return false
+         }
 
 
-    return fetch(`${API_URL}/productos` , {
-        method: "POST",
-        headers: {
-            "Content-Type" : "application/json",
-            'X-CSRF-TOKEN':getCookie('CSRF-TOKEN')
-        },
-        credentials: "include",
-        body : JSON.stringify({
+         const data = await apiFetch('productos',{
+            method: "POST",
+            body : JSON.stringify({
              nombre_producto : nombre,
              precio : precio,
              stock : stock ,
@@ -106,22 +118,20 @@ export async function initProducts(){
              id_brand : marca,
              precio_venta : precio_venta,
              user_id : user.data.user_id
-        })
-      })
-      .then(response => response.json())
-      .then(data => {
-          console.log(data)
-          if(!data.state){
-            console.error(data.error)
-            return;
-          }
-          mostrarNotificacion("Producto agregado","El producto se agrego correctamente");
-          const id=data.id_producto
-          return id
-      })
-      
+           })})
+        
+        if(!verify_answer_fetch(data,"Producto agregado","El producto se agrego correctamente")){
+            return false
+        }
+        return data.id_producto
+        
+        
+        
 
-      }}
+    }
+    
+
+    
 
       function sumar_total_productos(){
            const total= parseInt(document.getElementById("total").innerHTML) + 1
@@ -203,6 +213,7 @@ export async function initProducts(){
 
                     </tr>`
             )
+    sumar_total_productos()
 
     
 
