@@ -1,6 +1,6 @@
 
 import { mostrarNotificacion , mostrarError } from "./notificacion.js"
-import { getCookie } from "./util.js";
+import { getCookie , API_URL , apiFetch , verify_fields} from "./util.js";
 
 
 let eventos_actuales=[]
@@ -17,7 +17,7 @@ function registrarEvento(elemento, evento, funcion) {
 
 
 
-document.addEventListener('DOMContentLoaded' , () => {
+document.addEventListener('DOMContentLoaded' , async () => {
 
      
     fetch("http://localhost:8000/productos" , {
@@ -27,55 +27,69 @@ document.addEventListener('DOMContentLoaded' , () => {
 
     })
 
-    function init_login(){
+    async function init_login(){
         
     
        const login_button=document.querySelector(".login-button")
        registrarEvento(login_button,'click',login)
 
-       function login(e){
+       async function login(e){
            
-           e.preventDefault();
-            const user=document.getElementById("user").value
-            const password=document.getElementById("password").value
-
-        if(!user){
-            mostrarError("No ingreso un usuario")
-            return
-        }
-
-        if(!password){
-            mostrarError("No ingreso una contraseña")
-            return
-        }
-
-        fetch("http://localhost:8000/login" , {
-            method : 'POST',
-            headers:{
-                "Content-Type":"application/json",
-                'X-CSRF-TOKEN':getCookie('CSRF-TOKEN')
-            },
-            credentials: "include",
-            body:JSON.stringify({
-                name_user : user,
-                password : password
-            })
-        })
-        .then(request => request.json())
-        .then(data => {
-            if(!data.state){
-                mostrarError(data.error)
-                return;
-            }
             
-            window.location.href="http://localhost:8001/#bienvenida"
+            e.preventDefault();
 
-        })
+            const user=document.getElementById("user").value
+        
+            const password=document.getElementById("password").value
+   
+            if(!verify_fields({Usuario : user, Contraseña : password})){ 
+                return
+            }
+
+            await login_fetch(user,password)
 
        }
     }
 
-    init_login();
+    async function login_fetch(user , password){
+        const data = await apiFetch('login' , {
+            method : 'POST',
+            body:JSON.stringify({
+                name_user : user,
+                password : password
+            }),
+            
+
+        }) 
+
+        if(!data.state){
+            mostrarError(data.error)
+            return;
+        }
+            
+        window.location.href="http://localhost:8001/#bienvenida"
+    }
+
+
+    function verify_fields_login(user , password){
+        
+
+        if(!user){
+            
+            mostrarError("No ingreso un usuario")
+            return false
+        }
+
+        if(!password){
+            mostrarError("No ingreso una contraseña")
+            return false
+        }
+
+        return true
+
+    }
+
+    await init_login();
 
 
 
