@@ -1,6 +1,6 @@
 
 import { mostrarNotificacion , mostrarError } from "./notificacion.js"
-import { getCookie , API_URL , apiFetch , verify_fields} from "./util.js";
+import { getCookie , API_URL , apiFetch , verify_fields , APP_URL} from "./util.js";
 
 
 let eventos_actuales=[]
@@ -19,8 +19,8 @@ function registrarEvento(elemento, evento, funcion) {
 
 document.addEventListener('DOMContentLoaded' , async () => {
 
-     
-    fetch("http://localhost:8000/productos" , {
+ 
+    fetch(`${API_URL}/productos` , {
           method : 'GET',
           credentials: "include"
 
@@ -67,27 +67,10 @@ document.addEventListener('DOMContentLoaded' , async () => {
             return;
         }
             
-        window.location.href="http://localhost:8001/#bienvenida"
     }
+    window.location.href=`${APP_URL}/#bienvenida`
 
 
-    function verify_fields_login(user , password){
-        
-
-        if(!user){
-            
-            mostrarError("No ingreso un usuario")
-            return false
-        }
-
-        if(!password){
-            mostrarError("No ingreso una contraseña")
-            return false
-        }
-
-        return true
-
-    }
 
     await init_login();
 

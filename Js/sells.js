@@ -1,5 +1,5 @@
 import { mostrarNotificacion , mostrarError } from "./notificacion.js"
-import { getUser , getCookie } from "./util.js";
+import { getUser , getCookie, apiFetch, verify_answer_fetch } from "./util.js";
 const API_URL = window.APP_CONFIG.API_URL;
 
 let eventos_actuales=[]
@@ -22,35 +22,28 @@ export async function init_Ventas(){
      const user = await getUser();
 
 
-     function obtenerProductos(){
+     async function obtenerProductos(){
        
-       
-
-       
-
-       
-
        if(productos_sell_cache){
            obtenerProductosHTML(productos_sell_cache)
            return
           
        }
+
+       const data = await apiFetch('productos',{
+           method : 'GET',
+          
+       })
        
-       fetch(`${API_URL}/productos` , {
-          method : 'GET',
-          credentials: "include"
+       if(!verify_answer_fetch(data)){
+           return
+       }
 
+       productos_sell_cache=data
+       obtenerProductosHTML(productos_sell_cache)
 
-       })
-       .then(response => response.json())
-       .then(data => {
-            productos_sell_cache=data
-            obtenerProductosHTML(productos_sell_cache)
-            
-            
-            
-            
-       })
+    
+       }
 
 }
 
@@ -581,7 +574,7 @@ function confirmarVenta(e){
 
 
    }
-}
+
 
 function limpiar_Carrito(){
     const saleItems = document.getElementById("sale-items");

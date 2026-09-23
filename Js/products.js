@@ -2,7 +2,9 @@
 
 import { mostrarNotificacion , mostrarError } from "./notificacion.js"
 import { ventas_totales_cache, ingresos_totales_diarios_cache} from "./sells.js"
-import { getUser , getCookie , apiFetch , verify_fields, verify_answer_fetch  , API_URL} from "./util.js"
+import { getUser , getCookie , apiFetch , verify_fields, verify_answer_fetch_notification  , API_URL,
+    verify_answer_fetch
+} from "./util.js"
 
 
 
@@ -31,30 +33,139 @@ export async function initProducts(){
 
     const user = await getUser();
 
-    obtenerDatosProductos();
-    obtenerProductos();
-    actualizar_datos_registroHTML()
-    inicializar_datos_registro();
+
+    inicializarProductos()
+
+
+    function inicializarProductos(){
+        obtenerDatosProductos();
+        obtenerProductos();
+        actualizar_datos_registroHTML()
+        inicializar_datos_registro();
+
+    }
+
+    
+
+    async function obtenerDatosProductos(){
+         if(Datos_Productos_cache){
+            obtenerDatosProductosHTML(Datos_Productos_cache)
+            return
+        }
+
+        const data=await apiFetch('data_products',{
+            method : 'GET'
+        })
+
+        if(!verify_answer_fetch(data)){
+            return
+        }
+
+        Datos_Productos_cache=data
+        obtenerDatosProductosHTML(Datos_Productos_cache)  
+    }
+
+   function obtenerDatosProductosHTML(data){
+       document.getElementById("total").innerHTML = data.cantidad_productos;
+       document.getElementById("sin-stock").innerHTML = data.cantidad_productos_ws;
+    }
+
+    function obtenerProductos(){
+        if(Productos_cache){
+            obtenerProductosHTML(Productos_cache)
+            return;
+        }
+
+        const data = apiFetch('productos',{
+            method : 'GET',
+            credentials: "include"
+        })
+
+        if(!verify_answer_fetch(data)){
+            return
+        }
+
+        Productos_cache=data
+        obtenerProductosHTML(data)
+    }
+
+       function obtenerProductosHTML(data){
+            let status;
+            data.forEach(data => {
+
+                  switch(data.estado){
+                     case 'Disponible':
+                          status="ok"
+                           break;
+                     case 'Agotado':
+                          status="danger";
+                          break;
+
+                   }
+
+                  const tabla=document.getElementById("productos")
+                  tabla.insertAdjacentHTML(
+                    'beforeend',
+                    `<tr id="registro-${data.id_producto}">
+                        <td class="nombre-producto">${data.nombre_producto}</td>
+                        <td class="marca">${data.marca}</td>
+                        <td class="categoria">${data.nombre_categoria}</td>
+                        <td class="precio">${data.precio}</td>
+                        <td class="stock">${data.stock}</td>
+                        <td class="state"><span class="status ${status}">${data.estado}</span></td>
+                        <td><button 
+                        class="edit"
+                        id="edit-${data.id_producto}"
+                        data-id="${data.id_producto}"
+                        data-nombre="${data.nombre_producto}"
+                        data-precio="${data.precio}"
+                        data-precio_venta="${data.precio_venta}"
+                        data-stock="${data.stock}"
+                        data-marca="${data.id_brand}"
+                        data-categoria="${data.id_categoria}"
+                        >Editar
+                        </button>
+                        <td><button 
+                        class="delete"
+                        id="delete-${data.id_producto}"
+                        data-id="${data.id_producto}"
+                        >Eliminar
+                        </button>
+                        </td>
+                        </td>
+                    </tr>`
+                  )
+
+                
+            });
+
+        }
+
+
+
+
+
+
+
+
+
+
     
 
     const btnNuevoProducto = document.getElementById("btnNuevoProducto");
+    
 
-   const modalProducto = document.getElementById("modalProducto");
-   const modalContenido = document.getElementById("modalContenido");
+    const modalProducto = document.getElementById("modalProducto");
+    const modalContenido = document.getElementById("modalContenido");
 
+    
 
-   const estadoInput = document.getElementById("estado");
+    const tabla = document.getElementById("productos")
 
-   registrarEvento(btnNuevoProducto , "click" , inicializar_btnNuevoProducto);
+    registrarEvento(btnNuevoProducto , "click" , inicializar_btnNuevoProducto);
 
-   function inicializar_btnNuevoProducto(){
-       convertir_formulario_nuevo_producto()
-
-        inicializar_datos_formulario();
-
-        inicializar_funciones_formulario();
-
-        inicializar_funcion_stock()
+    function inicializar_btnNuevoProducto(){
+        convertir_formulario_nuevo_producto()
 
         const btn_guardar = document.getElementById("btn-guardar")
 
@@ -64,275 +175,7 @@ export async function initProducts(){
 
    }
 
-   function inicializar_datos_formulario(){
-         obtenerCategorias();
-         obtenerMarcas();
-      }
-
-   
-
-    async function agregarProducto(event){
-        event.preventDefault()
-
-        const id= await agregarProducto_fetch()
-
-        if(!id){
-            return
-        }
-
-        agregarProductoHTML(id)
-
-    }
-
-   async function agregarProducto_fetch(){
-
-         const nombre = document.getElementById("nombre_producto").value
-         const precio = document.getElementById("precio").value
-         const precio_venta = document.getElementById("precio_venta").value
-         const marca = document.getElementById("marca").value
-         const stock = document.getElementById("stock").value
-         const categoria = document.getElementById("categoria").value
-         const estado = document.getElementById("estado").value
-
-         if(!verify_fields({
-            Nombre : nombre,
-            Precio : precio,
-            Precio_Venta : precio_venta,
-            Marca : marca,
-            Stock : stock,
-            Categoria : categoria,
-            Estado : estado,
-         })){
-            return false
-         }
-
-
-         const data = await apiFetch('productos',{
-            method: "POST",
-            body : JSON.stringify({
-             nombre_producto : nombre,
-             precio : precio,
-             stock : stock ,
-             id_categoria : categoria ,
-             id_estado : estado,
-             id_brand : marca,
-             precio_venta : precio_venta,
-             user_id : user.data.user_id
-           })})
-        
-        if(!verify_answer_fetch(data,"Producto agregado","El producto se agrego correctamente")){
-            return false
-        }
-        return data.id_producto
-        
-        
-        
-
-    }
-    
-
-    
-
-      function sumar_total_productos(){
-           const total= parseInt(document.getElementById("total").innerHTML) + 1
-           document.getElementById("total").innerHTML=total.toString()
-      }
-
-      function restar_total_productos(){
-        const total= parseInt(document.getElementById("total").innerHTML) - 1
-        document.getElementById("total").innerHTML=total.toString()
-
-      }
-
-      
-
-      function inicializar_funciones_formulario(){
-          document.getElementById("btnCerrarModal").addEventListener("click", cerrarModal);
-          document.getElementById("btnCancelar").addEventListener("click", cerrarModal);
-       }
-      function agregarProductoHTML(id){
-       const nombre = document.getElementById("nombre_producto").value
-       const precio = document.getElementById("precio").value
-       const marca=document.getElementById("marca")
-       const texto_marca=marca.options[marca.selectedIndex].textContent;
-
-       const stock = document.getElementById("stock").value
-    
-      const categoria=document.getElementById("categoria")
-       const texto_categoria=categoria.options[categoria.selectedIndex].textContent;
-
-      let estado = document.getElementById("estado").value
-
-      let status = null;
-
-       switch(estado){
-           case "1":
-               status = "ok";
-               estado = "Disponible"
-               break
-           case "2":
-               status = "danger"
-               estado = "Agotado"
-               break
-               
-       }
-
-       console.log(estado)
-       console.log(status)
-
-
-       const tabla = document.getElementById("productos")
-       tabla.insertAdjacentHTML(
-                    'beforeend',
-                    `<tr id="registro-${id}">
-                        <td class="nombre-producto">${nombre}</td>
-                        <td class="marca">${texto_marca}</td>
-                        <td class="categoria">${texto_categoria}</td>
-                        <td class="precio">${precio}</td>
-                        <td class="stock">${stock}</td>
-                        <td class="state"><span class="status ${status}">${estado}</span></td>
-                        <td><button 
-                        class="edit"
-                        id="edit-${id}"
-                        data-id="${id}"
-                        data-nombre="${nombre}"
-                        data-precio="${precio}"
-                        data-stock="${stock}"
-                        data-marca="${marca.value}"
-                        data-categoria="${categoria.value}"
-                        >Editar
-                        </button>
-                        </td>
-                        <td><button 
-                        class="delete"
-                        id="delete-${id}"
-                        data-id="${id}"
-                        >Eliminar
-                        </button>
-                        </td>
-
-                    </tr>`
-            )
-    sumar_total_productos()
-
-    
-
-}
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-document.addEventListener("click" , (select) => {
-
-    if(select.target.classList.contains("edit")){
-
-        const id=select.target.dataset.id
-
-        convertir_formulario_editar_producto(select);
-        inicializar_datos_formulario();
-        inicializar_funciones_formulario();
-        
-        
-        inicializar_funcion_stock()
-
-        const btn_Editar=document.getElementById("btn-editar")
-
-        registrarEvento(btn_Editar , "click" , inicializar_btnEditar)
-
-        function inicializar_btnEditar(e){
-            e.preventDefault()
-            actualizarDatosProductos(id)
-            actualizarDatosProductsHTML(id)
-
-        }
-
-
-        modalProducto.classList.add("active");
-
-
-        
-
-        
-
-        
-
-    }else if(select.target.classList.contains("delete")){
-        
-
-        const id=select.target.dataset.id
-
-        convertir_formulario_eliminar_producto();
-        inicializar_funciones_formulario();
-
-        const btn_Delete=document.getElementById("btn-delete")
-
-        registrarEvento(btn_Delete , "click" , inicializar_btnDelete)
-
-        function inicializar_btnDelete(e){
-            e.preventDefault()
-            eliminarDatosProductos(id);
-            eliminarDatosProductosHTML(id);
-            restar_total_productos();
-
-        }
-        
-        modalProducto.classList.add("active");
-
-        
-
-    }
-
-})
-
-
-
-
-
-// Cerrar formulario
-function cerrarModal() {
-    modalProducto.classList.remove("active");
-    modalContenido.innerHTML="";
-}
-
-
-
-
-
-// Actualizar estado según stock
-
-
-function actualizar_estado_input(){
-    const stock = Number(document.getElementById("stock").value);
-
-    if (stock > 0) {
-        document.getElementById("estado").value = 1;
-    } else {
-        document.getElementById("estado").value = 2;
-    }
-
-}
-
-
-
-
-
-
-
-
-
-function convertir_formulario_nuevo_producto(){
+   function convertir_formulario_nuevo_producto(){
     modalContenido.insertAdjacentHTML('beforeend',
         `
         <div class="modal-header">
@@ -456,13 +299,312 @@ function convertir_formulario_nuevo_producto(){
                 </button>
             </div>
         </form>
-        
-        
-        
         `
-
     )
-}
+
+         
+        inicializar_formulario()
+
+        inicializar_funcion_stock()
+    }
+
+    function inicializar_formulario(){
+        inicializar_campos_formulario();
+
+        inicializar_funciones_cerrar_modal_formulario();
+
+    }
+
+    function inicializar_campos_formulario(){
+       inicializarCategorias();
+       inicializarMarcas();
+    }
+
+    async function inicializarCategorias(){
+       if(Categorias_cache){
+        obtenerCategoriasHTML(Categorias_cache)
+        return
+       }
+
+      const data = await apiFetch('categoria',{
+        method : 'GET'
+      })
+
+      if(!verify_answer_fetch(data)){
+        return false
+      }
+
+      Categorias_cache=data
+      pintarCategoriasHTML(Categorias_cache)
+    }
+
+    function pintarCategoriasHTML(data){
+       const categorias=document.getElementById("categoria")
+      data.forEach(data => {
+        categorias.insertAdjacentHTML('beforeend',
+                `
+            <option value=${data.id_categoria}>
+                ${data.categoria}
+            </option>
+                `
+        )
+    })
+
+    }
+
+    async function inicializarMarcas(){
+       if(Marcas_cache){
+          obtenerMarcasHTML(Marcas_cache)
+          return
+       }
+
+       const data = await apiFetch('marca')
+
+       if(!verify_answer_fetch(data)){
+         return false
+       }
+
+       Marcas_cache=data
+       pintarMarcasHTML(Marcas_cache)
+    }
+
+     function pintarMarcasHTML(data){
+       const marcas=document.getElementById("marca")
+        data.forEach(data => {
+        marcas.insertAdjacentHTML('beforeend', 
+                `
+            <option value=${data.id_brand}>
+                ${data.brand}
+            </option>
+
+            `
+        )
+       })
+
+    }
+
+    function inicializar_funciones_cerrar_modal_formulario(){
+       document.getElementById("btnCerrarModal").addEventListener("click", cerrarModal);
+       document.getElementById("btnCancelar").addEventListener("click", cerrarModal);
+    }
+
+    function cerrarModal() {
+       modalProducto.classList.remove("active");
+       modalContenido.innerHTML="";
+    }
+
+    function inicializar_funcion_stock(){
+       const stock = document.getElementById("stock")
+
+       registrarEvento(stock , "input" , actualizar_estado_input)
+    }
+
+    function actualizar_estado_input(){
+       const stock = Number(document.getElementById("stock").value);
+
+       const estadoInput = document.getElementById("estado");
+
+    if (stock > 0) {
+        estadoInput.value = 1;
+    } else {
+        estadoInput.value = 2;
+    }
+
+    }
+
+    async function agregarProducto(event){
+        event.preventDefault()
+
+        const id= await agregarProducto_fetch()
+
+        if(!id){
+            return
+        }
+
+        agregarProductoHTML(id)
+
+    }
+
+    async function agregarProducto_fetch(){
+
+         const nombre = document.getElementById("nombre_producto").value
+         const precio = document.getElementById("precio").value
+         const precio_venta = document.getElementById("precio_venta").value
+         const marca = document.getElementById("marca").value
+         const stock = document.getElementById("stock").value
+         const categoria = document.getElementById("categoria").value
+         const estado = document.getElementById("estado").value
+
+         if(!verify_fields({
+            Nombre : nombre,
+            Precio : precio,
+            Precio_Venta : precio_venta,
+            Marca : marca,
+            Stock : stock,
+            Categoria : categoria,
+            Estado : estado,
+         })){
+            return false
+         }
+
+
+         const data = await apiFetch('productos',{
+            method: "POST",
+            body : JSON.stringify({
+             nombre_producto : nombre,
+             precio : precio,
+             stock : stock ,
+             id_categoria : categoria ,
+             id_estado : estado,
+             id_brand : marca,
+             precio_venta : precio_venta,
+             user_id : user.data.user_id
+           })})
+        
+        if(!verify_answer_fetch_notification(data,"Producto agregado","El producto se agrego correctamente")){
+            return false
+        }
+        return data.id_producto
+        
+        
+        
+
+    }
+
+    function agregarProductoHTML(id){
+       const nombre = document.getElementById("nombre_producto").value
+
+       const precio = document.getElementById("precio").value
+
+       const marca=document.getElementById("marca")
+
+       const texto_marca=marca.options[marca.selectedIndex].textContent;
+
+       const stock = document.getElementById("stock").value
+    
+       const categoria=document.getElementById("categoria")
+
+       const texto_categoria=categoria.options[categoria.selectedIndex].textContent;
+
+      let estado = document.getElementById("estado").value
+
+      let status = null;
+
+       switch(estado){
+           case "1":
+               status = "ok";
+               estado = "Disponible"
+               break
+           case "2":
+               status = "danger"
+               estado = "Agotado"
+               break
+               
+       }
+
+       tabla.insertAdjacentHTML(
+                    'beforeend',
+                    `<tr id="registro-${id}">
+                        <td class="nombre-producto">${nombre}</td>
+                        <td class="marca">${texto_marca}</td>
+                        <td class="categoria">${texto_categoria}</td>
+                        <td class="precio">${precio}</td>
+                        <td class="stock">${stock}</td>
+                        <td class="state"><span class="status ${status}">${estado}</span></td>
+                        <td><button 
+                        class="edit"
+                        id="edit-${id}"
+                        data-id="${id}"
+                        data-nombre="${nombre}"
+                        data-precio="${precio}"
+                        data-stock="${stock}"
+                        data-marca="${marca.value}"
+                        data-categoria="${categoria.value}"
+                        >Editar
+                        </button>
+                        </td>
+                        <td><button 
+                        class="delete"
+                        id="delete-${id}"
+                        data-id="${id}"
+                        >Eliminar
+                        </button>
+                        </td>
+
+                    </tr>`
+            )
+    sumar_card_total_productos()
+
+    
+
+    }
+
+    function sumar_card_total_productos(){
+        const total= parseInt(document.getElementById("total").innerHTML) + 1
+        document.getElementById("total").innerHTML=total.toString()
+    }
+    
+
+    
+
+      
+
+    
+
+      
+
+      
+      
+document.addEventListener("click" , (select) => {
+
+    if(select.target.classList.contains("edit")){
+
+        const id=select.target.dataset.id
+
+        convertir_formulario_editar_producto(select);
+        
+        const btn_Editar=document.getElementById("btn-editar")
+
+        registrarEvento(btn_Editar , "click" , inicializar_btnEditar)
+
+        modalProducto.classList.add("active");
+
+
+        
+
+        
+
+        
+
+    }else if(select.target.classList.contains("delete")){
+        
+
+        const id=select.target.dataset.id
+
+        convertir_formulario_eliminar_producto();
+        
+        const btn_Delete=document.getElementById("btn-delete")
+
+        registrarEvento(btn_Delete , "click" , inicializar_btnDelete)
+
+        function inicializar_btnDelete(e){
+            e.preventDefault()
+            eliminarProductos(id)
+            restar_total_productos();
+
+        }
+        
+        modalProducto.classList.add("active");
+
+        
+
+    }
+
+})
+
+
+
+
 
 function convertir_formulario_editar_producto(select){
     modalContenido.insertAdjacentHTML('beforeend' ,
@@ -597,6 +739,21 @@ function convertir_formulario_editar_producto(select){
             `
          )
 
+        inicializar_formulario()
+        inicializar_funcion_stock()
+
+}
+
+function inicializar_btnEditar(e,id){
+        e.preventDefault()
+        actualizarProductos(id);
+        
+}
+
+function actualizarProductos(id){
+        actualizarDatosProductos(id)
+        actualizarDatosProductsHTML(id)
+
 }
 
 function convertir_formulario_eliminar_producto(select){
@@ -633,169 +790,13 @@ function convertir_formulario_eliminar_producto(select){
         `
 
      )
-
+     inicializar_funciones_cerrar_modal_formulario();
+     
+     
 }
 
 
 
-
-
-function obtenerProductos(){
-        if(Productos_cache){
-            obtenerProductosHTML(Productos_cache)
-            return;
-        }
-       
-       fetch("http://localhost:8000/productos" , {
-          method : 'GET',
-          credentials: "include"
-
-
-       })
-       .then(response => response.json())
-       .then(data => {
-            Productos_cache=data
-            obtenerProductosHTML(data)
-                        
-       })
-
-}
-
-function obtenerProductosHTML(data){
-            let status;
-            data.forEach(data => {
-
-                  switch(data.estado){
-                     case 'Disponible':
-                          status="ok"
-                           break;
-                     case 'Agotado':
-                          status="danger";
-                          break;
-
-                   }
-
-                  const tabla=document.getElementById("productos")
-                  tabla.insertAdjacentHTML(
-                    'beforeend',
-                    `<tr id="registro-${data.id_producto}">
-                        <td class="nombre-producto">${data.nombre_producto}</td>
-                        <td class="marca">${data.marca}</td>
-                        <td class="categoria">${data.nombre_categoria}</td>
-                        <td class="precio">${data.precio}</td>
-                        <td class="stock">${data.stock}</td>
-                        <td class="state"><span class="status ${status}">${data.estado}</span></td>
-                        <td><button 
-                        class="edit"
-                        id="edit-${data.id_producto}"
-                        data-id="${data.id_producto}"
-                        data-nombre="${data.nombre_producto}"
-                        data-precio="${data.precio}"
-                        data-precio_venta="${data.precio_venta}"
-                        data-stock="${data.stock}"
-                        data-marca="${data.id_brand}"
-                        data-categoria="${data.id_categoria}"
-                        >Editar
-                        </button>
-                        <td><button 
-                        class="delete"
-                        id="delete-${data.id_producto}"
-                        data-id="${data.id_producto}"
-                        >Eliminar
-                        </button>
-                        </td>
-                        </td>
-                    </tr>`
-                  )
-
-                
-            });
-
-}
-
-function obtenerCategorias(){
-    if(Categorias_cache){
-        obtenerCategoriasHTML(Categorias_cache)
-        return
-    }
-
-    fetch(`${API_URL}/categoria` , {
-        method : 'GET',
-        credentials: "include"
-    })
-    .then(response => response.json())
-    .then(data => {
-         Categorias_cache=data
-         obtenerCategoriasHTML(Categorias_cache)
-    })
-}
-
-function obtenerCategoriasHTML(data){
-    const categorias=document.getElementById("categoria")
-         data.forEach(data => {
-             categorias.insertAdjacentHTML('beforeend',
-                `
-                <option value=${data.id_categoria}>
-                        ${data.categoria}
-                </option>
-                `
-             )
-         })
-
-}
-
-function obtenerMarcas(){
-    if(Marcas_cache){
-        obtenerMarcasHTML(Marcas_cache)
-        return
-    }
-    fetch(`${API_URL}/marca `, {
-        method : 'GET',
-        credentials: "include"
-    })
-    .then(response => response.json())
-    .then(data => {
-        Marcas_cache=data
-        obtenerMarcasHTML(Marcas_cache)
-    })
-}
-
-function obtenerMarcasHTML(data){
-    const marcas=document.getElementById("marca")
-        data.forEach(data => {
-            marcas.insertAdjacentHTML('beforeend', 
-                `
-                <option value=${data.id_brand}>
-                        ${data.brand}
-                </option>
-
-                `
-            )
-        })
-
-}
-
-function obtenerDatosProductos(){
-    if(Datos_Productos_cache){
-        obtenerDatosProductosHTML(Datos_Productos_cache)
-        return
-    }
-    fetch(`${API_URL}/data_products` , {
-        method : 'GET',
-        credentials: "include"
-    })
-    .then(response => response.json())
-    .then(data => {
-        Datos_Productos_cache=data
-        obtenerDatosProductosHTML(Datos_Productos_cache)    
-    })
-}
-
-function obtenerDatosProductosHTML(data){
-    document.getElementById("total").innerHTML = data.cantidad_productos;
-    document.getElementById("sin-stock").innerHTML = data.cantidad_productos_ws;
-
-}
 
 function actualizarDatosProductos(id){
     const nombre = document.getElementById("nombre_producto").value
@@ -805,46 +806,44 @@ function actualizarDatosProductos(id){
     const estado = document.getElementById("estado").value
     const marca = document.getElementById("marca").value
     const precio_venta=document.getElementById("precio_venta").value
-    
-    fetch(`${API_URL}/productos` , {
-        method : 'PUT',
-        headers: {
-            "Content-Type" : "application/json",
-            'X-CSRF-TOKEN':getCookie('CSRF-TOKEN')
-        },
-        credentials: "include",
-        
-        body : JSON.stringify({
-             id_producto : id,
+
+    if(!verify_fields({
+            Nombre : nombre,
+            Precio : precio,
+            Precio_Venta : precio_venta,
+            Marca : marca,
+            Stock : stock,
+            Categoria : categoria,
+            Estado : estado,
+         })){
+            return false
+    }
+
+
+    const data = await apiFetch('productos',{
+            method: "PUT",
+            body : JSON.stringify({
              nombre_producto : nombre,
              precio : precio,
              stock : stock ,
              id_categoria : categoria ,
              id_estado : estado,
-             id_brand : marca ,
+             id_brand : marca,
              precio_venta : precio_venta,
              user_id : user.data.user_id
+           })})
 
-        })
-        
-
-    })
-    .then(response => response.json())
-    .then(data => {
-          if(!data.state){
-            console.error(data.error)
-            return;
-          }
-          mostrarNotificacion("Producto editado","El producto se edito correctamente");
-          cerrarModal();
-          Productos_cache=null
-        
-      })
+    if(!verify_answer_fetch_notification(data,"Producto editado","El producto se edito correctamente")){
+        return 
+    }
+    
+    cerrarModal();
+    Productos_cache=null
 }
 
 function actualizarDatosProductsHTML(id){
     const elementos=document.getElementById("registro-"+id).children
-        console.log(elementos)
+        
         
         Array.from(elementos).forEach( Element => {
 
@@ -873,10 +872,10 @@ function actualizarDatosProductsHTML(id){
                       const estado=document.getElementById("estado").value
 
                       const sin_stock=parseInt(document.getElementById("sin-stock").innerHTML)
-                      console.log(sin_stock)
+                      
                       switch(estado){
                         case "1":
-                            console.log("1")
+                            
                             Element.firstChild.innerHTML="Disponible"
                             if(Element.firstChild.classList.contains("danger")){
                                 Element.firstChild.classList.add("ok")
@@ -885,7 +884,7 @@ function actualizarDatosProductsHTML(id){
                             }
                             break;
                         case "2":
-                            console.log("2")
+                            
                             Element.firstChild.innerHTML="Agotado"
                             if(Element.firstChild.classList.contains("ok")){
                                 Element.firstChild.classList.add("danger")
@@ -911,31 +910,28 @@ function actualizarDatosProductsHTML(id){
 
 }
 
+function eliminarProductos(id){
+    eliminarDatosProductos(id)
+    eliminarDatosProductosHTML(id)
+}
+
 
 function eliminarDatosProductos(id){
-    fetch(`${API_URL}/productos` , {
+    const data=apiFetch('productos',{
         method : 'DELETE',
-        headers:{
-            'Content-Type': "application/json",
-            'X-CSRF-TOKEN':getCookie('CSRF-TOKEN')
-        },
-        credentials: "include",
         body:JSON.stringify({
             id_producto:id,
             user_id : user.data.user_id
         })
     })
-    .then(response => response.json())
-    .then(data => {
-        if(!data.state){
-            console.error(data.error)
-            return;
-          }
-          mostrarNotificacion("Producto eliminado","El producto se elimino correctamente");
-          cerrarModal();
-          Productos_cache=null
 
-    })
+    if(!verify_answer_fetch_notification(data,"Producto eliminado","El producto se elimino correctamente")){
+        return
+    }
+
+    cerrarModal();
+    Productos_cache=null
+
 }
 
 
@@ -943,14 +939,17 @@ function eliminarDatosProductosHTML(id){
     const registro_id=document.getElementById("registro-"+id)
     registro_id.innerHTML=" "
     registro_id.remove()
+    restar_total_productos()
 
 }
 
-function inicializar_funcion_stock(){
-    const stock = document.getElementById("stock")
+function restar_total_productos(){
+    const total= parseInt(document.getElementById("total").innerHTML) - 1
+    document.getElementById("total").innerHTML=total.toString()
 
-    registrarEvento(stock , "input" , actualizar_estado_input)
 }
+
+
 
 
 function inicializar_datos_registro(){
@@ -959,24 +958,17 @@ function inicializar_datos_registro(){
         return
     }
 
-    fetch(`${API_URL}/data_register`,{
-        method: 'GET',
-        credentials : 'include'
+    const data=apifetch('data_register' , {
+        method: 'GET'
     })
-    .then(response => response.json())
-    .then(data => {
-        if(!data.state){
-            mostrarError(data.mensaje)
-            return
-        }
-        Datos_Registro_cache=data
-        inicializar_datos_registroHTML(data)
 
+    if(!verify_answer_fetch(data)){
+        return
+    }
 
+    Datos_Registro_cache=data
+    inicializar_datos_registroHTML(data)
 
-
-
-    })
 }
 
 function inicializar_datos_registroHTML(data){
@@ -1017,7 +1009,7 @@ function evento_buscador(event){
     event.preventDefault();
 
     let productos_filtrados;
-    console.log(Productos_cache)
+    
 
     switch(Filtro.value){
         case 'productos':

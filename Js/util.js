@@ -1,11 +1,11 @@
 import { mostrarNotificacion , mostrarError } from "./notificacion.js"
 
 export const API_URL = window.APP_CONFIG.API_URL;
+export const APP_URL = window.APP_CONFIG.APP_URL;
 
 
 export function getCookie(name){
         const value = `; ${document.cookie}`
-        console.log(value)
         const parts =value.split(`; ${name}=`)
         if(parts.length == 2){
             return decodeURIComponent(parts.pop().split(';').shift())
@@ -16,7 +16,7 @@ export function getCookie(name){
 
 
 export function getUser() {
-         return fetch('http://localhost:8000/me' , {credentials : "include"})
+         return fetch(`${API_URL}/me` , {credentials : "include"})
                 .then(res => {  
                     return res.json()
                 })
@@ -58,12 +58,20 @@ export function verify_fields(fields = {}){
     return flag
 }
 
-export function verify_answer_fetch(data,title,details){
+export function verify_answer_fetch_notification(data,title,details){
     if(!data.state){
         mostrarError(data.error)
         return false;
     }
     mostrarNotificacion("Producto agregado","El producto se agrego correctamente");
+    return true;
+
+}
+
+export function verify_answer_fetch(data){
+    if(!data.state){
+        return false;
+    }
     return true;
 
 }
