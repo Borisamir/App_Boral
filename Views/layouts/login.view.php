@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../../Css/global.css">
     <script>
         window.APP_CONFIG ={ API_URL : <?= json_encode($_ENV['API_URL']) ?>};
+        window.APP_CONFIG ={ APP_URL : <?= json_encode($_ENV['APP_URL']) ?>};
     </script>
     <script type ="module" src="../../Js/util.js" defer></script>
     <script type="module" src="../../Js/login.js" defer></script>

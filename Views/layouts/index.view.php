@@ -7,9 +7,6 @@
     <title>BoralPanel</title>
     <link rel="stylesheet" href="../../Css/global.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
-    <script>
-        window.APP_CONFIG ={ API_URL : <?= json_encode($_ENV['API_URL']) ?>};
-    </script>
     <script type="module" src="../../Js/index.js" defer></script>
 </head>
 <body>
