@@ -6,7 +6,7 @@ use App\Controller\Controller_View;
 use Pecee\SimpleRouter\SimpleRouter;
 use Dotenv\Dotenv;
 header("X-Frame-Options: DENY");
-header("Referrer-Policy : strict-origin-when-cross-origin");
+header("Referrer-Policy: strict-origin-when-cross-origin");
 //header("Strict-Transport-Security: max-age=31536000; includeSubDomains");
 
 $dotenv = Dotenv::createImmutable(__DIR__ . '');

@@ -1,5 +1,5 @@
 import { seccion_bienvenida , seccion_productos ,  seccion_ventas , seccion_estadisticas} from "./sections.js"
-import { getCookie } from "./util.js";
+import { getCookie , API_URL , apiFetch , verify_answer_fetch , APP_URL} from "./util.js";
 document.addEventListener("DOMContentLoaded" , () => {
 
     
@@ -55,8 +55,6 @@ document.addEventListener("DOMContentLoaded" , () => {
     function revisar_ubicacion(){
         const seccion = window.location.hash
     
-        console.log(seccion)
-
         switch(seccion){
          case '#bienvenida':
              seccion_bienvenida()
@@ -79,25 +77,18 @@ document.addEventListener("DOMContentLoaded" , () => {
 
     }
 
-    function cerrar_sesion(){
-        fetch("http://localhost:8000/logout" , {
-                    method : 'POST',
-                    headers:{
-                        "Content-Type":"application/json",
-                        'X-CSRF-TOKEN':getCookie('CSRF-TOKEN')
-                    },
-                    credentials: "include",
-                })
-                .then(request => request.json())
-                .then(data => {
-                    if(!data.state){
-                        mostrarError(data.error)
-                        return;
-                    }
-                    document.cookie='CSRF-TOKEN=; expires=Thu , 01 Jan 1970 00:00:00 GMT ;path=/'
-                    window.location.href="http://localhost:8001/login"
-        
-                })
+    async function cerrar_sesion(){
+        const data = await apiFetch('logout',{
+            method : 'POST',
+        })
+
+        if(!verify_answer_fetch(data)){
+            return
+        }
+
+        document.cookie='CSRF-TOKEN=; expires=Thu , 01 Jan 1970 00:00:00 GMT ;path=/'
+        window.location.href= `${APP_URL}/login `
+
         
     }
 
