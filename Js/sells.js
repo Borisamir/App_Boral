@@ -35,9 +35,10 @@ export async function init_Ventas(){
           
        })
        
-       if(!verify_answer_fetch(data)){
-           return
-       }
+       if(data.error){
+            console.log(data.error)
+            return;
+        }
 
        productos_sell_cache=data
        obtenerProductosHTML(productos_sell_cache)
