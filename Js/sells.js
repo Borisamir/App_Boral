@@ -47,7 +47,7 @@ export async function init_Ventas(){
 
        obtenerProductos();
 
-}
+
 
 function obtenerProductosHTML(data){
     const select_product= document.getElementById("product-select")
@@ -77,9 +77,9 @@ function limpiar_Productos(){
 /* AGREGAR PRODUCTO */
 
  const productSelect = document.getElementById("product-select");
-    const addProductButton = document.getElementById("add-product");
-    const saleItems = document.getElementById("sale-items");
-const btnConfirmarVenta = document.querySelector(".btn-confirmar-venta");
+ const addProductButton = document.getElementById("add-product");
+ const saleItems = document.getElementById("sale-items");
+ const btnConfirmarVenta = document.querySelector(".btn-confirmar-venta");
     
     const productCount = document.getElementById("product-count");
     const totalProducts = document.getElementById("total-products");
@@ -139,6 +139,8 @@ function addProduct(){
     productSelect.value = "";
 
 }
+
+
 
 
 registrarEvento(addProductButton,"click", addProduct)
@@ -602,6 +604,8 @@ function actualizar_cache_ventas_products(){
        console.log(ventas_totales_cache)
        console.log(ingresos_totales_diarios_cache)
 
+
+}
 
 }
 
