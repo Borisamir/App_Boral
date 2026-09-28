@@ -1,6 +1,6 @@
 import { mostrarNotificacion , mostrarError } from "./notificacion.js"
 
-export const API_URL = window.API_CONFIG.API_URL;
+export const API_URL = window.APP_CONFIG.API_URL;
 export const APP_URL = window.APP_CONFIG.APP_URL;
 
 

@@ -6,8 +6,10 @@
     <title>Iniciar sesión - BoralPanel</title>
     <link rel="stylesheet" href="../../Css/global.css">
     <script>
-        window.API_CONFIG ={ API_URL : <?= json_encode($_ENV['API_URL']) ?>};
-        window.APP_CONFIG ={ APP_URL : <?= json_encode($_ENV['APP_URL']) ?>};
+        window.APP_CONFIG ={ 
+            API_URL : <?= json_encode($_ENV['API_URL']) ?>;
+            APP_URL : <?= json_encode($_ENV['APP_URL']) ?>
+        };
     </script>
     <script type ="module" src="../../Js/util.js" defer></script>
     <script type="module" src="../../Js/login.js" defer></script>
