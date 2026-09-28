@@ -69,7 +69,9 @@ export function verify_answer_fetch_notification(data,title,details){
 }
 
 export function verify_answer_fetch(data){
+    console.log(data)
     if(!data.state){
+        console.log("Error")
         return false;
     }
     return true;

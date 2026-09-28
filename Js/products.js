@@ -34,14 +34,14 @@ export async function initProducts(){
     const user = await getUser();
 
 
-    inicializarProductos()
+    await inicializarProductos()
 
 
-    function inicializarProductos(){
-        obtenerDatosProductos();
-        obtenerProductos();
-        actualizar_datos_registroHTML()
-        inicializar_datos_registro();
+    async function inicializarProductos(){
+        await obtenerDatosProductos();
+        await obtenerProductos();
+        await actualizar_datos_registroHTML()
+        await inicializar_datos_registro();
 
     }
 
@@ -58,6 +58,7 @@ export async function initProducts(){
         })
 
         if(!verify_answer_fetch(data)){
+            
             return
         }
 
@@ -81,15 +82,12 @@ export async function initProducts(){
             credentials: "include"
         })
 
-        if(!verify_answer_fetch(data)){
-            return
-        }
-
         Productos_cache=data
         obtenerProductosHTML(data)
     }
 
        function obtenerProductosHTML(data){
+            console.log(data)
             let status;
             data.forEach(data => {
 
