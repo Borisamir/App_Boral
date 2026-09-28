@@ -798,7 +798,7 @@ function convertir_formulario_eliminar_producto(select){
 
 
 
-function actualizarDatosProductos(id){
+async function actualizarDatosProductos(id){
     const nombre = document.getElementById("nombre_producto").value
     const precio = document.getElementById("precio").value
     const stock = document.getElementById("stock").value
@@ -916,8 +916,8 @@ function eliminarProductos(id){
 }
 
 
-function eliminarDatosProductos(id){
-    const data=apiFetch('productos',{
+async function eliminarDatosProductos(id){
+    const data=await apiFetch('productos',{
         method : 'DELETE',
         body:JSON.stringify({
             id_producto:id,
