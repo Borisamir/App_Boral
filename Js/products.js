@@ -952,13 +952,13 @@ function restar_total_productos(){
 
 
 
-function inicializar_datos_registro(){
+async function inicializar_datos_registro(){
     if(Datos_Registro_cache){
         inicializar_datos_registroHTML(Datos_Registro_cache)
         return
     }
 
-    const data=apifetch('data_register' , {
+    const data=await apiFetch('data_register' , {
         method: 'GET'
     })
 
