@@ -70,13 +70,13 @@ export async function initProducts(){
        document.getElementById("sin-stock").innerHTML = data.cantidad_productos_ws;
     }
 
-    function obtenerProductos(){
+    async function obtenerProductos(){
         if(Productos_cache){
             obtenerProductosHTML(Productos_cache)
             return;
         }
 
-        const data = apiFetch('productos',{
+        const data = await apiFetch('productos',{
             method : 'GET',
             credentials: "include"
         })
