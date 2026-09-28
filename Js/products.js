@@ -82,6 +82,11 @@ export async function initProducts(){
             credentials: "include"
         })
 
+        if(data.error){
+            console.log(data.error)
+            return;
+        }
+
         Productos_cache=data
         obtenerProductosHTML(data)
     }
