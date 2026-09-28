@@ -6,6 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BoralPanel</title>
     <link rel="stylesheet" href="../../Css/global.css">
+    <script>
+        window.APP_CONFIG ={ 
+            API_URL : <?= json_encode($_ENV['API_URL']) ?>;
+            APP_URL : <?= json_encode($_ENV['APP_URL']) ?>
+        };
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
     <script type="module" src="../../Js/index.js" defer></script>
 </head>
