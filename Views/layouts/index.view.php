@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../../Css/global.css">
     <script>
         window.APP_CONFIG ={ 
-            API_URL : <?= json_encode($_ENV['API_URL']) ?>;
+            API_URL : <?= json_encode($_ENV['API_URL']) ?>,
             APP_URL : <?= json_encode($_ENV['APP_URL']) ?>
         };
     </script>
