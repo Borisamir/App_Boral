@@ -49,9 +49,8 @@ document.addEventListener('DOMContentLoaded' , async () => {
             await login_fetch(user,password)
 
        }
-    }
 
-    async function login_fetch(user , password){
+       async function login_fetch(user , password){
         const data = await apiFetch('login' , {
             method : 'POST',
             body:JSON.stringify({
@@ -66,9 +65,14 @@ document.addEventListener('DOMContentLoaded' , async () => {
             mostrarError(data.error)
             return;
         }
+
+        window.location.href=`${APP_URL}/#bienvenida`
             
+       }
     }
-    window.location.href=`${APP_URL}/#bienvenida`
+
+    
+    
 
 
 
