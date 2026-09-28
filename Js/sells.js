@@ -45,6 +45,8 @@ export async function init_Ventas(){
     
        }
 
+       obtenerProductos();
+
 }
 
 function obtenerProductosHTML(data){
@@ -57,7 +59,7 @@ function obtenerProductosHTML(data){
 
 }
 
-obtenerProductos();
+
 
 
 
